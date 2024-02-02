@@ -1,0 +1,3 @@
+<component name="DependencyValidationManager">
+  <scope name="Copyright" pattern="file[hyper-rpc.api]:*/*.java||file[hyper-rpc.common]:*/*.java||file[hyper-rpc.impl]:*/*.java||file[hyper-rpc.service]:*/*.java" />
+</component>
