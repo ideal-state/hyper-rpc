@@ -3,6 +3,7 @@ package team.idealstate.hyper.rpc.impl.netty;
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
@@ -54,6 +55,11 @@ public final class ClientStarter implements ServiceStarter, ServiceInvoker {
         this.bootstrap = new Bootstrap().group(workerGroup)
                 .channel(NioSocketChannel.class)
                 .remoteAddress(connectAddress)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 6000)
+                .option(ChannelOption.SO_BACKLOG, 8)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.SO_SNDBUF, 65535)
+                .option(ChannelOption.SO_RCVBUF, 65535)
                 .handler(new ClientInitializer(this, this.key, this.serviceManager));
     }
 

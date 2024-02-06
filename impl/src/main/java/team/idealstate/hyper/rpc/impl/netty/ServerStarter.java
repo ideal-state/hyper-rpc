@@ -3,6 +3,7 @@ package team.idealstate.hyper.rpc.impl.netty;
 import io.netty.bootstrap.ServerBootstrap;
 import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioServerSocketChannel;
@@ -54,6 +55,11 @@ public final class ServerStarter implements ServiceStarter {
         this.bootstrap = new ServerBootstrap().group(bossGroup, workerGroup)
                 .channel(NioServerSocketChannel.class)
                 .localAddress(bindAddress)
+                .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 6000)
+                .option(ChannelOption.SO_BACKLOG, 8)
+                .option(ChannelOption.TCP_NODELAY, true)
+                .option(ChannelOption.SO_SNDBUF, 65535)
+                .option(ChannelOption.SO_RCVBUF, 65535)
                 .childHandler(new ServerInitializer(this, this.key, this.serviceManager));
     }
 
