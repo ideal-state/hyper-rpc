@@ -56,7 +56,6 @@ public final class ClientStarter implements ServiceStarter, ServiceInvoker {
                 .channel(NioSocketChannel.class)
                 .remoteAddress(connectAddress)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 6000)
-                .option(ChannelOption.SO_BACKLOG, 8)
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_SNDBUF, 65535)
                 .option(ChannelOption.SO_RCVBUF, 65535)
