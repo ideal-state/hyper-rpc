@@ -9,14 +9,17 @@ val authors = properties["self.authors"] as String
 val javaVersion = (properties["self.java.version"] as String).toInt()
 val charset = properties["self.charset"] as String
 
-val excludes = setOf<String>(
+group = "team.idealstate.hyper.rpc"
+version = majorVersion
+
+val excludes = setOf(
         "example"
 )
 subprojects {
-    if (!excludes.contains(name)) {
-        group = "team.idealstate.hyper.rpc"
-        version = majorVersion
+    group = rootProject.group
+    version = rootProject.version
 
+    if (!excludes.contains(name)) {
         apply {
             plugin("java")
             plugin("java-library")
