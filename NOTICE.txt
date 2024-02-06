@@ -14,27 +14,34 @@ hyper-rpc
 
 ========================================================================
 
-logging-log4j2
+logging-log4j2:
+    log4j-core
 (https://github.com/apache/logging-log4j2)
 
 ========================================================================
 
-commons-lang
-(https://github.com/apache/commons-lang)
-
-========================================================================
-
-netty
-(https://github.com/netty/netty)
-
-========================================================================
-
-asm
+asm:
+    asm
 (https://gitlab.ow2.org/asm/asm)
 
 ========================================================================
 
-snakeyaml-engine
-(https://bitbucket.org/snakeyaml/snakeyaml-engine)
+jackson-databind
+(https://github.com/FasterXML/jackson-databind)
+
+========================================================================
+
+jackson-modules-java8:
+    jackson-module-parameter-names
+    jackson-datatype-jsr310
+    jackson-datatype-jdk8
+(https://github.com/FasterXML/jackson-modules-java8)
+
+========================================================================
+
+netty:
+    netty-codec
+    netty-handler
+(https://github.com/netty/netty)
 
 ************************************************************************

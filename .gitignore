@@ -40,3 +40,6 @@ bin/
 
 ### Mac OS ###
 .DS_Store
+/.idea/codeStyles/codeStyleConfig.xml
+/.idea/git_toolbox_prj.xml
+/.idea/uiDesigner.xml

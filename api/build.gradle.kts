@@ -12,6 +12,9 @@ val charset = project.ext["charset"] as String
 dependencies {
     compileOnly("org.jetbrains:annotations:24.0.0")
     compileOnly(fileTree("${projectDir}/libraries"))
+
+    api("org.apache.logging.log4j:log4j-core:2.22.1")
+    api("org.ow2.asm:asm:9.6")
 }
 
 java {
@@ -51,6 +54,7 @@ tasks.shadowJar {
                 "Version" to project.version,
                 "Authors" to authors,
                 "Updated" to DateFormatUtils.format(Date(), "yyyy-MM-dd HH:mm:ssZ"),
+                "Multi-Release" to true,
         ))
     }
 }
@@ -58,4 +62,10 @@ tasks.shadowJar {
 tasks.jar {
     dependsOn(tasks.shadowJar)
     enabled = false
+    finalizedBy("copyToRootBuildLibs")
+}
+
+tasks.create<Copy>("copyToRootBuildLibs") {
+    from(tasks.shadowJar)
+    into("${rootProject.projectDir}/build/libs")
 }

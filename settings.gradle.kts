@@ -1,9 +1,10 @@
 rootProject.name = "hyper-rpc"
 
-include(":common")
 include(":api")
 include(":impl")
-include(":service")
+include(":example:common")
+include(":example:server")
+include(":example:client")
 
 pluginManagement {
     repositories {

@@ -13,8 +13,13 @@ dependencies {
     compileOnly("org.jetbrains:annotations:24.0.0")
     compileOnly(fileTree("${projectDir}/libraries"))
 
-    implementation("io.netty:netty-codec:4.1.86.Final")
-    implementation("io.netty:netty-handler:4.1.59.Final")
+    api(project(":api"))
+    api("com.fasterxml.jackson.core:jackson-databind:2.16.1")
+    api("com.fasterxml.jackson.module:jackson-module-parameter-names:2.16.1")
+    api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1")
+    api("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.1")
+    api("io.netty:netty-codec:4.1.86.Final")
+    api("io.netty:netty-handler:4.1.59.Final")
 }
 
 java {
@@ -47,6 +52,7 @@ tasks.shadowJar {
     val projectName = "${rootProject.name}-${project.name}"
     archiveBaseName.set(projectName)
     archiveClassifier.set("")
+    from(project(":api").tasks.shadowJar)
     manifest {
         attributes(linkedMapOf(
                 "Group" to project.group,
@@ -54,6 +60,8 @@ tasks.shadowJar {
                 "Version" to project.version,
                 "Authors" to authors,
                 "Updated" to DateFormatUtils.format(Date(), "yyyy-MM-dd HH:mm:ssZ"),
+                "Multi-Release" to true,
+                "Main-Class" to "team.idealstate.hyper.rpc.impl.RsaKeyPairGenerator",
         ))
     }
 }
@@ -61,4 +69,10 @@ tasks.shadowJar {
 tasks.jar {
     dependsOn(tasks.shadowJar)
     enabled = false
+    finalizedBy("copyToRootBuildLibs")
+}
+
+tasks.create<Copy>("copyToRootBuildLibs") {
+    from(tasks.shadowJar)
+    into("${rootProject.projectDir}/build/libs")
 }
