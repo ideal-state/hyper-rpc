@@ -1,6 +1,7 @@
 package team.idealstate.hyper.rpc.impl.service;
 
 import org.jetbrains.annotations.NotNull;
+import team.idealstate.hyper.rpc.api.TypeUtils;
 import team.idealstate.hyper.rpc.api.future.Future;
 import team.idealstate.hyper.rpc.api.service.AbstractServiceManager;
 import team.idealstate.hyper.rpc.api.service.InvokeInformationConverter;
@@ -75,7 +76,7 @@ public final class JdkProxyServiceManager extends AbstractServiceManager {
                     Future<InvokeResult> resultFuture = call(invokeDetail);
                     final Class<?> returnType = method.getReturnType();
                     InvokeResult invokeResult = resultFuture.get(getTimeout());
-                    final Class<?> dataType = Class.forName(invokeResult.getDataType());
+                    final Class<?> dataType = TypeUtils.getActualClass(invokeResult.getDataType());
                     if (invokeResult.getCode() == InvokeResult.Code.SUCCESS.getCode()) {
                         if (returnType.isAssignableFrom(dataType)) {
                             if (void.class.isAssignableFrom(returnType) || Void.class.isAssignableFrom(returnType)) {

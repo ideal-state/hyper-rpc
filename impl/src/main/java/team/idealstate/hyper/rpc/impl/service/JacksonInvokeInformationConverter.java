@@ -94,7 +94,7 @@ public final class JacksonInvokeInformationConverter implements InvokeInformatio
         actualInvokeDetail.setId(invokeDetail.getId());
         final Class<?>[] argumentClasses;
         try {
-            final Class<?> serviceInterface = Class.forName(invokeDetail.getService());
+            final Class<?> serviceInterface = TypeUtils.getActualClass(invokeDetail.getService());
             actualInvokeDetail.setServiceInterface(serviceInterface);
             argumentClasses = getArgumentClasses(Type.getArgumentTypes(invokeDetail.getDescription()));
             actualInvokeDetail.setMethod(serviceInterface.getMethod(invokeDetail.getMethod(), argumentClasses));
@@ -133,7 +133,7 @@ public final class JacksonInvokeInformationConverter implements InvokeInformatio
         actualInvokeResult.setCode(InvokeResult.Code.codeOf(invokeResult.getCode()));
         Class<?> dataType;
         try {
-            dataType = Class.forName(invokeResult.getDataType());
+            dataType = TypeUtils.getActualClass(invokeResult.getDataType());
             actualInvokeResult.setData(JacksonUtils.toBean(invokeResult.getData(), dataType));
         } catch (ClassNotFoundException | JsonProcessingException e) {
             throw new InvokeInformationConvertException(e);

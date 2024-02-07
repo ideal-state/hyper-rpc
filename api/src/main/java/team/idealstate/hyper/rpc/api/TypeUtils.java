@@ -98,4 +98,34 @@ public abstract class TypeUtils {
         }
         return getActualClassName(className);
     }
+
+    /**
+     * @return 返回对应 Class
+     */
+    @NotNull
+    public static Class<?> getActualClass(@NotNull String actualClassName) throws ClassNotFoundException {
+        AssertUtils.notBlank(actualClassName, "无效的实际类型名称");
+        switch (actualClassName) {
+            case "Z":
+                return boolean.class;
+            case "C":
+                return char.class;
+            case "B":
+                return byte.class;
+            case "S":
+                return short.class;
+            case "I":
+                return int.class;
+            case "F":
+                return float.class;
+            case "J":
+                return long.class;
+            case "D":
+                return double.class;
+            case "V":
+                return Void.class;
+            default:
+                return Class.forName(actualClassName.replace("[V", "[Ljava.lang.Void;"));
+        }
+    }
 }
