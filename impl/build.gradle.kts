@@ -14,10 +14,11 @@ dependencies {
     compileOnly(fileTree("${projectDir}/libraries"))
 
     api(project(":api"))
-    api("com.fasterxml.jackson.core:jackson-databind:2.16.1")
-    api("com.fasterxml.jackson.module:jackson-module-parameter-names:2.16.1")
-    api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:2.16.1")
-    api("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:2.16.1")
+    val jacksonVersion = "2.15.3"
+    api("com.fasterxml.jackson.core:jackson-databind:${jacksonVersion}")
+    api("com.fasterxml.jackson.module:jackson-module-parameter-names:${jacksonVersion}")
+    api("com.fasterxml.jackson.datatype:jackson-datatype-jsr310:${jacksonVersion}")
+    api("com.fasterxml.jackson.datatype:jackson-datatype-jdk8:${jacksonVersion}")
     api("io.netty:netty-codec:4.1.86.Final")
     api("io.netty:netty-handler:4.1.59.Final")
 }

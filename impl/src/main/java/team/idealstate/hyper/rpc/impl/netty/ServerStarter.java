@@ -78,6 +78,9 @@ public final class ServerStarter implements ServiceStarter {
             } catch (InterruptedException e) {
                 logger.error("[{}] 线程中断，服务端未能启动完成", bindAddress);
                 return;
+            } catch (Throwable e) {
+                logger.error(e.getMessage());
+                logger.debug("catching", e);
             }
             this.needClose = false;
             this.active = true;

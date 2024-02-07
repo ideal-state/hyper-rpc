@@ -113,6 +113,7 @@ public final class JacksonInvokeInformationConverter implements InvokeInformatio
         invokeDetail.setMethod(actualInvokeDetail.getMethod().getName());
         invokeDetail.setDescription(Type.getMethodDescriptor(actualInvokeDetail.getMethod()));
         Object[] argumentObjects = actualInvokeDetail.getArgumentObjects();
+        argumentObjects = argumentObjects == null ? new Object[0] : argumentObjects;
         String[] arguments = new String[argumentObjects.length];
         try {
             for (int i = 0; i < argumentObjects.length; i++) {

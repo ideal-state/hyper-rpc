@@ -77,6 +77,9 @@ public final class ClientStarter implements ServiceStarter, ServiceInvoker {
             } catch (InterruptedException e) {
                 logger.error("[{}] 线程中断，客户端未能启动完成", connectAddress);
                 return;
+            } catch (Throwable e) {
+                logger.error(e.getMessage());
+                logger.debug("catching", e);
             }
             this.needClose = false;
             this.active = true;
