@@ -6,6 +6,7 @@ import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
@@ -25,9 +26,10 @@ import java.util.concurrent.TimeUnit;
 /**
  * <p>ClientHeartbeatHandler</p>
  *
- * <p>Created on 2024/1/27 0:48</p>
+ * <p>创建于 2024/1/27 0:48</p>
  *
  * @author ketikai
+ * @version 1.0.2
  * @since 1.0.0
  */
 @ChannelHandler.Sharable
@@ -36,8 +38,10 @@ public class ClientHeartbeatHandler extends ChannelInboundHandlerAdapter {
     private static final Logger logger = LogManager.getLogger(ClientHeartbeatHandler.class);
 
     private final ServiceStarter serviceStarter;
+    private final ChannelGroup channelGroup;
 
-    public ClientHeartbeatHandler(@NotNull ServiceStarter serviceStarter) {
+    public ClientHeartbeatHandler(@NotNull ServiceStarter serviceStarter, ChannelGroup channelGroup) {
+        this.channelGroup = channelGroup;
         AssertUtils.notNull(serviceStarter, "服务启动器不允许为 null");
         this.serviceStarter = serviceStarter;
     }
@@ -57,6 +61,7 @@ public class ClientHeartbeatHandler extends ChannelInboundHandlerAdapter {
             ctx.writeAndFlush(Unpooled.copiedBuffer(data));
             logger.trace("[{}] 已向远程服务服务端发送心跳包", ctx.channel().remoteAddress());
         }, 0, 15, TimeUnit.SECONDS);
+        channelGroup.add(ctx.channel());
         super.channelActive(ctx);
     }
 

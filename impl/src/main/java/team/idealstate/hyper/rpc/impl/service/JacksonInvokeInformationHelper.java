@@ -20,7 +20,7 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jetbrains.annotations.NotNull;
 import org.objectweb.asm.Type;
 import team.idealstate.hyper.rpc.api.TypeUtils;
-import team.idealstate.hyper.rpc.api.service.InvokeInformationConverter;
+import team.idealstate.hyper.rpc.api.service.InvokeInformationHelper;
 import team.idealstate.hyper.rpc.api.service.entity.ActualInvokeDetail;
 import team.idealstate.hyper.rpc.api.service.entity.ActualInvokeResult;
 import team.idealstate.hyper.rpc.api.service.entity.InvokeDetail;
@@ -29,17 +29,18 @@ import team.idealstate.hyper.rpc.api.service.exception.InvokeInformationConvertE
 import team.idealstate.hyper.rpc.impl.JacksonUtils;
 
 /**
- * <p>JacksonInvokeInformationConverter</p>
+ * <p>JacksonInvokeInformationHelper</p>
  *
  * <p>创建于 2024/2/4 16:34</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
-public final class JacksonInvokeInformationConverter implements InvokeInformationConverter {
+public final class JacksonInvokeInformationHelper implements InvokeInformationHelper {
 
-    private static Class<?>[] getArgumentClasses(Type[] argumentTypes) throws ClassNotFoundException {
+
+    private static Class<?>[] getArgumentClasses(Type[] argumentTypes, @NotNull ClassLoader classLoader) throws ClassNotFoundException {
         Class<?>[] argumentClasses = new Class<?>[argumentTypes.length];
         for (int i = 0; i < argumentTypes.length; i++) {
             Type argumentType = argumentTypes[i];
@@ -73,7 +74,11 @@ public final class JacksonInvokeInformationConverter implements InvokeInformatio
                     argumentClasses[i] = Void.class;
                     break;
                 default:
-                    argumentClasses[i] = Class.forName(actualClassName.replace("[V", "[Ljava.lang.Void;"));
+                    argumentClasses[i] = Class.forName(
+                            actualClassName.replace("[V", "[Ljava.lang.Void;"),
+                            false,
+                            classLoader
+                    );
             }
         }
         return argumentClasses;
@@ -89,14 +94,19 @@ public final class JacksonInvokeInformationConverter implements InvokeInformatio
     }
 
     @Override
-    public @NotNull ActualInvokeDetail convert(@NotNull InvokeDetail invokeDetail) throws InvokeInformationConvertException {
+    public @NotNull Class<?> getServiceInterface(@NotNull InvokeDetail invokeDetail, @NotNull ClassLoader classLoader) throws ClassNotFoundException {
+        return TypeUtils.getActualClass(invokeDetail.getService(), classLoader);
+    }
+
+    @Override
+    public @NotNull ActualInvokeDetail convert(@NotNull InvokeDetail invokeDetail, @NotNull ClassLoader classLoader) throws InvokeInformationConvertException {
         ActualInvokeDetail actualInvokeDetail = new ActualInvokeDetail();
         actualInvokeDetail.setId(invokeDetail.getId());
         final Class<?>[] argumentClasses;
         try {
-            final Class<?> serviceInterface = TypeUtils.getActualClass(invokeDetail.getService());
+            final Class<?> serviceInterface = TypeUtils.getActualClass(invokeDetail.getService(), classLoader);
             actualInvokeDetail.setServiceInterface(serviceInterface);
-            argumentClasses = getArgumentClasses(Type.getArgumentTypes(invokeDetail.getDescription()));
+            argumentClasses = getArgumentClasses(Type.getArgumentTypes(invokeDetail.getDescription()), classLoader);
             actualInvokeDetail.setMethod(serviceInterface.getMethod(invokeDetail.getMethod(), argumentClasses));
             actualInvokeDetail.setArgumentObjects(getArgumentObjects(argumentClasses, invokeDetail.getArguments()));
         } catch (ClassNotFoundException | NoSuchMethodException | JsonProcessingException e) {
@@ -106,7 +116,7 @@ public final class JacksonInvokeInformationConverter implements InvokeInformatio
     }
 
     @Override
-    public @NotNull InvokeDetail convert(@NotNull ActualInvokeDetail actualInvokeDetail) throws InvokeInformationConvertException {
+    public @NotNull InvokeDetail convert(@NotNull ActualInvokeDetail actualInvokeDetail, @NotNull ClassLoader classLoader) throws InvokeInformationConvertException {
         InvokeDetail invokeDetail = new InvokeDetail();
         invokeDetail.setId(actualInvokeDetail.getId());
         invokeDetail.setService(TypeUtils.getActualClassName(Type.getType(actualInvokeDetail.getServiceInterface())));
@@ -127,13 +137,13 @@ public final class JacksonInvokeInformationConverter implements InvokeInformatio
     }
 
     @Override
-    public @NotNull ActualInvokeResult convert(@NotNull InvokeResult invokeResult) throws InvokeInformationConvertException {
+    public @NotNull ActualInvokeResult convert(@NotNull InvokeResult invokeResult, @NotNull ClassLoader classLoader) throws InvokeInformationConvertException {
         ActualInvokeResult actualInvokeResult = new ActualInvokeResult();
         actualInvokeResult.setId(invokeResult.getId());
         actualInvokeResult.setCode(InvokeResult.Code.codeOf(invokeResult.getCode()));
         Class<?> dataType;
         try {
-            dataType = TypeUtils.getActualClass(invokeResult.getDataType());
+            dataType = TypeUtils.getActualClass(invokeResult.getDataType(), classLoader);
             actualInvokeResult.setData(JacksonUtils.toBean(invokeResult.getData(), dataType));
         } catch (ClassNotFoundException | JsonProcessingException e) {
             throw new InvokeInformationConvertException(e);
@@ -143,7 +153,7 @@ public final class JacksonInvokeInformationConverter implements InvokeInformatio
     }
 
     @Override
-    public @NotNull InvokeResult convert(@NotNull ActualInvokeResult actualInvokeResult) throws InvokeInformationConvertException {
+    public @NotNull InvokeResult convert(@NotNull ActualInvokeResult actualInvokeResult, @NotNull ClassLoader classLoader) throws InvokeInformationConvertException {
         InvokeResult invokeResult = new InvokeResult();
         invokeResult.setId(actualInvokeResult.getId());
         invokeResult.setCode(actualInvokeResult.getCode().getCode());

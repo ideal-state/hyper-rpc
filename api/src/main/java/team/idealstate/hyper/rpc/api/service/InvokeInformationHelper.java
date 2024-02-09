@@ -24,25 +24,28 @@ import team.idealstate.hyper.rpc.api.service.entity.InvokeResult;
 import team.idealstate.hyper.rpc.api.service.exception.InvokeInformationConvertException;
 
 /**
- * <p>InvokeInformationConverter</p>
+ * <p>InvokeInformationHelper</p>
  *
  * <p>创建于 2024/2/4 13:57</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
-public interface InvokeInformationConverter {
+public interface InvokeInformationHelper {
 
     @NotNull
-    ActualInvokeDetail convert(@NotNull InvokeDetail invokeDetail) throws InvokeInformationConvertException;
+    Class<?> getServiceInterface(@NotNull InvokeDetail invokeDetail, @NotNull ClassLoader classLoader) throws ClassNotFoundException;
 
     @NotNull
-    InvokeDetail convert(@NotNull ActualInvokeDetail actualInvokeDetail) throws InvokeInformationConvertException;
+    ActualInvokeDetail convert(@NotNull InvokeDetail invokeDetail, @NotNull ClassLoader classLoader) throws InvokeInformationConvertException;
 
     @NotNull
-    ActualInvokeResult convert(@NotNull InvokeResult invokeResult) throws InvokeInformationConvertException;
+    InvokeDetail convert(@NotNull ActualInvokeDetail actualInvokeDetail, @NotNull ClassLoader classLoader) throws InvokeInformationConvertException;
 
     @NotNull
-    InvokeResult convert(@NotNull ActualInvokeResult actualInvokeResult) throws InvokeInformationConvertException;
+    ActualInvokeResult convert(@NotNull InvokeResult invokeResult, @NotNull ClassLoader classLoader) throws InvokeInformationConvertException;
+
+    @NotNull
+    InvokeResult convert(@NotNull ActualInvokeResult actualInvokeResult, @NotNull ClassLoader classLoader) throws InvokeInformationConvertException;
 }

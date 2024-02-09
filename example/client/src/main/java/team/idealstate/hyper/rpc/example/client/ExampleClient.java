@@ -2,19 +2,19 @@ package team.idealstate.hyper.rpc.example.client;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import team.idealstate.hyper.rpc.api.service.ServiceManager;
+import team.idealstate.hyper.rpc.api.StringUtils;
 import team.idealstate.hyper.rpc.api.service.Watchdog;
 import team.idealstate.hyper.rpc.example.common.KeyUtils;
-import team.idealstate.hyper.rpc.example.common.model.entity.Hello;
+import team.idealstate.hyper.rpc.example.common.service.CalcService;
 import team.idealstate.hyper.rpc.example.common.service.HelloService;
 import team.idealstate.hyper.rpc.impl.netty.ClientStarter;
-import team.idealstate.hyper.rpc.impl.service.JdkProxyServiceManager;
+import team.idealstate.hyper.rpc.impl.service.StdServiceManager;
 
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.security.Key;
-import java.time.Instant;
 import java.util.Scanner;
+import java.util.concurrent.Executors;
 
 /**
  * <p>ExampleClient</p>
@@ -22,7 +22,7 @@ import java.util.Scanner;
  * <p>创建于 2024/2/6 16:57</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
 public final class ExampleClient {
@@ -30,14 +30,17 @@ public final class ExampleClient {
     private static final Logger logger = LogManager.getLogger(ExampleClient.class);
 
     public static void main(String[] args) throws IOException {
-        final Key key = KeyUtils.loadPrivateKey();
+        final Key key = KeyUtils.loadPublicKey();
         final InetSocketAddress connectAddress = new InetSocketAddress("0.0.0.0", 11454);
-        final ServiceManager serviceManager = ServiceManager.getInstance();
-        serviceManager.register(HelloService.class);
         final int nThreads = 2;
-        final ClientStarter serverStarter = new ClientStarter(connectAddress, key, serviceManager, nThreads);
-        ((JdkProxyServiceManager) serviceManager).setServiceInvoker(serverStarter);
-        final Watchdog watchdog = new Watchdog(serverStarter);
+        final StdServiceManager serviceManager = new StdServiceManager(
+                Executors.newFixedThreadPool(nThreads)
+        );
+        serviceManager.register(HelloService.class);
+        serviceManager.register(CalcService.class);
+        final ClientStarter clientStarter = new ClientStarter(connectAddress, key, serviceManager, nThreads);
+        serviceManager.setServiceInvoker(clientStarter);
+        final Watchdog watchdog = new Watchdog(clientStarter);
         watchdog.startup();
         final Scanner scanner = new Scanner(System.in);
         while (true) {
@@ -46,14 +49,20 @@ public final class ExampleClient {
                 logger.info("已接收到退出指令");
                 break;
             }
-            if (line.startsWith("hello ")) {
-                final HelloService helloService;
-                try {
-                    helloService = serviceManager.get(HelloService.class);
-                    final Hello hello = helloService.hello(new Hello(line.substring(6), Instant.now()));
-                    logger.info("[{}]: {}", hello.getTimestamp(), hello.getMessage());
-                } catch (Throwable e) {
-                    logger.catching(e);
+            if (line.startsWith("calc ")) {
+                String[] args0 = line.split(" ");
+                if (args0.length == 3 && StringUtils.isIntegral(args0[1]) && StringUtils.isIntegral(args0[2])) {
+
+                    final CalcService calcService;
+                    try {
+                        calcService = serviceManager.get(CalcService.class);
+                        int a = Integer.parseInt(args0[1]);
+                        int b = Integer.parseInt(args0[2]);
+                        long sum = calcService.sum(a, b);
+                        logger.info("[CalcService]: {} + {} = {}", a, b, sum);
+                    } catch (Throwable e) {
+                        logger.catching(e);
+                    }
                 }
             }
         }

@@ -5,8 +5,11 @@ import io.netty.channel.Channel;
 import io.netty.channel.ChannelFuture;
 import io.netty.channel.ChannelOption;
 import io.netty.channel.EventLoopGroup;
+import io.netty.channel.group.ChannelGroup;
+import io.netty.channel.group.DefaultChannelGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import io.netty.util.concurrent.GlobalEventExecutor;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
@@ -26,10 +29,10 @@ import java.util.concurrent.TimeUnit;
  * <p>创建于 2024/2/5 20:44</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
-public final class ClientStarter implements ServiceStarter, ServiceInvoker {
+public class ClientStarter implements ServiceStarter, ServiceInvoker {
     private static final Logger logger = LogManager.getLogger(ClientStarter.class);
     private final SocketAddress connectAddress;
     private final Key key;
@@ -40,6 +43,8 @@ public final class ClientStarter implements ServiceStarter, ServiceInvoker {
     private volatile boolean active = false;
     private volatile Channel connectChannel = null;
     private volatile boolean needClose = false;
+    private final ChannelGroup channelGroup = new DefaultChannelGroup(GlobalEventExecutor.INSTANCE);
+
     /**
      * @param key      RSA 密钥
      * @param nThreads 工作线程数
@@ -59,7 +64,7 @@ public final class ClientStarter implements ServiceStarter, ServiceInvoker {
                 .option(ChannelOption.TCP_NODELAY, true)
                 .option(ChannelOption.SO_SNDBUF, 65535)
                 .option(ChannelOption.SO_RCVBUF, 65535)
-                .handler(new ClientInitializer(this, this.key, this.serviceManager));
+                .handler(new ClientInitializer(this, this.key, this.serviceManager, channelGroup));
     }
 
     @Override
@@ -74,18 +79,25 @@ public final class ClientStarter implements ServiceStarter, ServiceInvoker {
             ChannelFuture channelFuture = bootstrap.connect();
             try {
                 channelFuture.sync();
+                logger.info("[{}] 客户端启动完成", connectAddress);
             } catch (InterruptedException e) {
                 logger.error("[{}] 线程中断，客户端未能启动完成", connectAddress);
                 return;
-            } catch (Throwable e) {
-                logger.error(e.getMessage());
-                logger.debug("catching", e);
             }
             this.needClose = false;
             this.active = true;
             this.connectChannel = channelFuture.channel();
-            logger.info("[{}] 客户端启动完成", connectAddress);
         }
+    }
+
+    @Override
+    public void needClose() {
+        this.needClose = true;
+    }
+
+    @Override
+    public boolean isNeedClose() {
+        return needClose;
     }
 
     @Override
@@ -97,6 +109,7 @@ public final class ClientStarter implements ServiceStarter, ServiceInvoker {
                 if (channel != null) {
                     try {
                         channel.close().sync();
+                        channelGroup.clear();
                     } catch (InterruptedException e) {
                         logger.error("[{}] 线程中断，通道未能完成关闭", connectAddress);
                         return;
@@ -110,13 +123,8 @@ public final class ClientStarter implements ServiceStarter, ServiceInvoker {
     }
 
     @Override
-    public void needClose() {
-        this.needClose = true;
-    }
-
-    @Override
-    public boolean isNeedClose() {
-        return needClose;
+    public boolean isActive() {
+        return active;
     }
 
     @Override
@@ -144,21 +152,13 @@ public final class ClientStarter implements ServiceStarter, ServiceInvoker {
                 } catch (InterruptedException ignored) {
                 }
             }
+            channelGroup.clear();
         }
-    }
-
-    @Override
-    public boolean isActive() {
-        return active;
     }
 
     @Override
     public void invoke(@NotNull InvokeDetail invokeDetail) {
         AssertUtils.notNull(invokeDetail, "服务调用细节不允许为 null");
-        Channel channel = connectChannel;
-        if (!active || channel == null || !channel.isActive()) {
-            throw new UnsupportedOperationException("服务调用器尚未准备完成");
-        }
-        channel.writeAndFlush(invokeDetail);
+        channelGroup.writeAndFlush(invokeDetail);
     }
 }

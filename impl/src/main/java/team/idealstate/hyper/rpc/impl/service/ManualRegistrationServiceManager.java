@@ -4,7 +4,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import team.idealstate.hyper.rpc.api.service.AbstractServiceManager;
-import team.idealstate.hyper.rpc.api.service.InvokeInformationConverter;
+import team.idealstate.hyper.rpc.api.service.InvokeInformationHelper;
 import team.idealstate.hyper.rpc.api.service.entity.ActualInvokeDetail;
 import team.idealstate.hyper.rpc.api.service.entity.ActualInvokeResult;
 import team.idealstate.hyper.rpc.api.service.entity.InvokeDetail;
@@ -16,18 +16,23 @@ import java.util.concurrent.ExecutorService;
 /**
  * <p>ManualRegistrationServiceManager</p>
  *
+ * <p>
+ * 已弃用，请使用 {@link StdServiceManager}
+ * </p>
+ *
  * <p>创建于 2024/2/6 13:32</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
+@Deprecated
 public final class ManualRegistrationServiceManager extends AbstractServiceManager {
 
     private static final Logger logger = LogManager.getLogger(ManualRegistrationServiceManager.class);
 
-    public ManualRegistrationServiceManager(@NotNull InvokeInformationConverter invokeInformationConverter, @NotNull ExecutorService executorService) {
-        super(invokeInformationConverter, executorService);
+    public ManualRegistrationServiceManager(@NotNull InvokeInformationHelper invokeInformationHelper, @NotNull ExecutorService executorService) {
+        super(invokeInformationHelper, executorService);
     }
 
     @Override
@@ -37,7 +42,8 @@ public final class ManualRegistrationServiceManager extends AbstractServiceManag
 
     @Override
     protected void callDetail(@NotNull InvokeDetail invokeDetail) throws Throwable {
-        final ActualInvokeDetail actualInvokeDetail = invokeInformationConverter.convert(invokeDetail);
+        ClassLoader classLoader = getClassLoader();
+        final ActualInvokeDetail actualInvokeDetail = invokeInformationHelper.convert(invokeDetail, classLoader);
         final Object serviceInstance = get(actualInvokeDetail.getServiceInterface());
         final Method method = actualInvokeDetail.getMethod();
         final ActualInvokeResult actualInvokeResult = new ActualInvokeResult();
@@ -54,7 +60,7 @@ public final class ManualRegistrationServiceManager extends AbstractServiceManag
             actualInvokeResult.setData("服务调用过程中抛出异常（详细信息请见服务提供方的日志）");
             logger.catching(e);
         } finally {
-            final InvokeResult invokeResult = invokeInformationConverter.convert(actualInvokeResult);
+            final InvokeResult invokeResult = invokeInformationHelper.convert(actualInvokeResult, classLoader);
             callback(invokeResult);
         }
     }

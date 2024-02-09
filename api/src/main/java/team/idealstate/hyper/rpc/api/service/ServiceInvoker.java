@@ -25,7 +25,7 @@ import team.idealstate.hyper.rpc.api.service.entity.InvokeDetail;
  * <p>创建于 2024/2/6 13:04</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
 public interface ServiceInvoker {

@@ -17,7 +17,7 @@ import java.security.PublicKey;
  * <p>创建于 2024/2/6 21:41</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
 public abstract class KeyUtils {
@@ -26,7 +26,7 @@ public abstract class KeyUtils {
         final File keyFile = new File("./key");
         final Path keyPath = keyFile.toPath();
         if (!keyFile.exists()) {
-            try (InputStream inputStream = KeyUtils.class.getResourceAsStream("/assets/hyper-rpc/common/public")) {
+            try (InputStream inputStream = KeyUtils.class.getResourceAsStream("/assets/hyper-rpc/client/public")) {
                 if (inputStream == null) {
                     throw new FileNotFoundException("消息密钥文件不存在");
                 }
@@ -43,7 +43,7 @@ public abstract class KeyUtils {
         final File keyFile = new File("./key");
         final Path keyPath = keyFile.toPath();
         if (!keyFile.exists()) {
-            try (InputStream inputStream = KeyUtils.class.getResourceAsStream("/assets/hyper-rpc/common/private")) {
+            try (InputStream inputStream = KeyUtils.class.getResourceAsStream("/assets/hyper-rpc/server/private")) {
                 if (inputStream == null) {
                     throw new FileNotFoundException("消息密钥文件不存在");
                 }

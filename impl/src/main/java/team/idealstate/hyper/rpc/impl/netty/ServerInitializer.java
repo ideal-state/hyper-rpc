@@ -2,6 +2,7 @@ package team.idealstate.hyper.rpc.impl.netty;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
@@ -20,18 +21,20 @@ import java.security.Key;
  * <p>创建于 2024/2/5 20:23</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
-final class ServerInitializer extends ChannelInitializer<SocketChannel> {
+public class ServerInitializer extends ChannelInitializer<SocketChannel> {
     private final ServiceStarter serviceStarter;
     private final Key key;
     private final ServiceManager serviceManager;
+    private final ChannelGroup channelGroup;
 
     /**
      * @param key RSA 密钥
      */
-    public ServerInitializer(@NotNull ServiceStarter serviceStarter, @NotNull Key key, @NotNull ServiceManager serviceManager) {
+    public ServerInitializer(@NotNull ServiceStarter serviceStarter, @NotNull Key key, @NotNull ServiceManager serviceManager, ChannelGroup channelGroup) {
+        this.channelGroup = channelGroup;
         AssertUtils.notNull(serviceStarter, "服务启动器不允许为 null");
         AssertUtils.notNull(key, "消息密钥不允许为 null");
         AssertUtils.notNull(serviceManager, "服务管理器不允许为 null");
@@ -50,7 +53,7 @@ final class ServerInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new LengthFieldPrepender(2, 0, false))
                 .addLast(new SafeMessageCodec(key))
                 .addLast(new OutboundMessageChecker())
-                .addLast(new ServerHeartbeatHandler())
+                .addLast(new ServerHeartbeatHandler(channelGroup))
                 .addLast(new InvokeDetailCodec())
                 .addLast(new InvokeResultCodec())
                 .addLast(new InboundMessageChecker())

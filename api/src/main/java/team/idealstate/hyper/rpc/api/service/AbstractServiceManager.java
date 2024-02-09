@@ -28,9 +28,11 @@ import team.idealstate.hyper.rpc.api.service.entity.InvokeResult;
 import team.idealstate.hyper.rpc.api.service.exception.UnregisteredServiceException;
 
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.TimeUnit;
+import java.util.concurrent.atomic.AtomicReference;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -50,14 +52,18 @@ public abstract class AbstractServiceManager implements ServiceManager {
 
     protected final Map<Class<?>, Object> registeredServiceInstanceMap = new ConcurrentHashMap<>(64, 0.6F);
     protected final Map<String, Future<InvokeResult>> resultFutureMap = new ConcurrentHashMap<>(32, 0.6F);
-    protected final InvokeInformationConverter invokeInformationConverter;
+    protected final InvokeInformationHelper invokeInformationHelper;
     protected final ExecutorService executorService;
     protected final Lock lock = new ReentrantLock();
+    private final AtomicReference<ClassLoader> classLoader = new AtomicReference<>(
+            Optional.ofNullable(Thread.currentThread().getContextClassLoader())
+                    .orElse(getClass().getClassLoader())
+    );
 
-    protected AbstractServiceManager(@NotNull InvokeInformationConverter invokeInformationConverter, @NotNull ExecutorService executorService) {
-        AssertUtils.notNull(invokeInformationConverter, "调用信息转换器不能为 null");
+    protected AbstractServiceManager(@NotNull InvokeInformationHelper invokeInformationHelper, @NotNull ExecutorService executorService) {
+        AssertUtils.notNull(invokeInformationHelper, "调用信息转换器不能为 null");
         AssertUtils.notNull(executorService, "执行器服务不能为 null");
-        this.invokeInformationConverter = invokeInformationConverter;
+        this.invokeInformationHelper = invokeInformationHelper;
         this.executorService = executorService;
     }
 
@@ -189,5 +195,17 @@ public abstract class AbstractServiceManager implements ServiceManager {
             } catch (InterruptedException ignored) {
             }
         }
+    }
+
+    @NotNull
+    @Override
+    public ClassLoader getClassLoader() {
+        return classLoader.get();
+    }
+
+    @Override
+    public void setClassLoader(@NotNull ClassLoader classLoader) {
+        AssertUtils.notNull(classLoader, "无效的类加载器");
+        this.classLoader.set(classLoader);
     }
 }

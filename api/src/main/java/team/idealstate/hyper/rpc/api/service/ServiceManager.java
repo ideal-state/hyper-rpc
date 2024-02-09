@@ -23,7 +23,6 @@ import team.idealstate.hyper.rpc.api.future.exception.InvalidFutureException;
 import team.idealstate.hyper.rpc.api.service.entity.InvokeDetail;
 import team.idealstate.hyper.rpc.api.service.entity.InvokeResult;
 import team.idealstate.hyper.rpc.api.service.exception.UnregisteredServiceException;
-import team.idealstate.hyper.rpc.api.service.spi.ServiceManagerProvider;
 
 /**
  * <p>ServiceManager</p>
@@ -31,15 +30,10 @@ import team.idealstate.hyper.rpc.api.service.spi.ServiceManagerProvider;
  * <p>创建于 2024/2/4 11:16</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
 public interface ServiceManager {
-
-    @NotNull
-    static ServiceManager getInstance() {
-        return ServiceManagerProvider.getInstance().get();
-    }
 
     @Nullable <T> T register(@NotNull Class<T> serviceInterface) throws IllegalArgumentException;
 
@@ -58,4 +52,9 @@ public interface ServiceManager {
     void callback(@NotNull InvokeResult invokeResult);
 
     void shutdown();
+
+    @NotNull
+    ClassLoader getClassLoader();
+
+    void setClassLoader(@NotNull ClassLoader classLoader);
 }

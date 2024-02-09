@@ -5,6 +5,7 @@ import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandler;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.handler.timeout.IdleState;
 import io.netty.handler.timeout.IdleStateEvent;
 import io.netty.util.ReferenceCountUtil;
@@ -21,9 +22,10 @@ import java.util.Date;
 /**
  * <p>ServerHeartbeatHandler</p>
  *
- * <p>Created on 2024/1/26 22:27</p>
+ * <p>创建于 2024/1/26 22:27</p>
  *
  * @author ketikai
+ * @version 1.0.2
  * @since 1.0.0
  */
 @ChannelHandler.Sharable
@@ -31,18 +33,21 @@ public class ServerHeartbeatHandler extends ChannelInboundHandlerAdapter {
 
     private static final Logger logger = LogManager.getLogger(ServerHeartbeatHandler.class);
     private final boolean respond;
+    private final ChannelGroup channelGroup;
 
-    public ServerHeartbeatHandler() {
-        this(true);
+    public ServerHeartbeatHandler(ChannelGroup channelGroup) {
+        this(true, channelGroup);
     }
 
-    public ServerHeartbeatHandler(boolean respond) {
+    public ServerHeartbeatHandler(boolean respond, ChannelGroup channelGroup) {
         this.respond = respond;
+        this.channelGroup = channelGroup;
     }
 
     @Override
     public void channelActive(ChannelHandlerContext ctx) throws Exception {
         logger.info("[{}] 有新的远程服务客户端连接", ctx.channel().remoteAddress());
+        channelGroup.add(ctx.channel());
         super.channelActive(ctx);
     }
 

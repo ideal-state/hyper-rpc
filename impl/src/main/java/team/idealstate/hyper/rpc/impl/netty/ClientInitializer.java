@@ -2,6 +2,7 @@ package team.idealstate.hyper.rpc.impl.netty;
 
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
+import io.netty.channel.group.ChannelGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
@@ -20,18 +21,21 @@ import java.security.Key;
  * <p>创建于 2024/2/5 20:23</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
-final class ClientInitializer extends ChannelInitializer<SocketChannel> {
+public class ClientInitializer extends ChannelInitializer<SocketChannel> {
     private final ServiceStarter serviceStarter;
     private final Key key;
     private final ServiceManager serviceManager;
+    private final ChannelGroup channelGroup;
 
     /**
-     * @param key RSA 密钥
+     * @param key          RSA 密钥
+     * @param channelGroup
      */
-    public ClientInitializer(@NotNull ServiceStarter serviceStarter, @NotNull Key key, @NotNull ServiceManager serviceManager) {
+    public ClientInitializer(@NotNull ServiceStarter serviceStarter, @NotNull Key key, @NotNull ServiceManager serviceManager, ChannelGroup channelGroup) {
+        this.channelGroup = channelGroup;
         AssertUtils.notNull(serviceStarter, "服务启动器不允许为 null");
         AssertUtils.notNull(key, "消息密钥不允许为 null");
         AssertUtils.notNull(serviceManager, "服务管理器不允许为 null");
@@ -49,7 +53,7 @@ final class ClientInitializer extends ChannelInitializer<SocketChannel> {
                 .addLast(new LengthFieldBasedFrameDecoder(65535, 0, 2, 0, 2, true))
                 .addLast(new LengthFieldPrepender(2, 0, false))
                 .addLast(new SafeMessageCodec(key))
-                .addLast(new ClientHeartbeatHandler(serviceStarter))
+                .addLast(new ClientHeartbeatHandler(serviceStarter, channelGroup))
                 .addLast(new OutboundMessageChecker())
                 .addLast(new InvokeDetailCodec())
                 .addLast(new InvokeResultCodec())

@@ -30,7 +30,7 @@ import java.util.Set;
  * <p>创建于 2024/2/4 14:43</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
 public abstract class TypeUtils {
@@ -103,7 +103,7 @@ public abstract class TypeUtils {
      * @return 返回对应 Class
      */
     @NotNull
-    public static Class<?> getActualClass(@NotNull String actualClassName) throws ClassNotFoundException {
+    public static Class<?> getActualClass(@NotNull String actualClassName, @NotNull ClassLoader classLoader) throws ClassNotFoundException {
         AssertUtils.notBlank(actualClassName, "无效的实际类型名称");
         switch (actualClassName) {
             case "Z":
@@ -125,7 +125,11 @@ public abstract class TypeUtils {
             case "V":
                 return Void.class;
             default:
-                return Class.forName(actualClassName.replace("[V", "[Ljava.lang.Void;"));
+                return Class.forName(
+                        actualClassName.replace("[V", "[Ljava.lang.Void;"),
+                        false,
+                        classLoader
+                );
         }
     }
 }

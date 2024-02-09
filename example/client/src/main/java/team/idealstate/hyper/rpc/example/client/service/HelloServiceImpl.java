@@ -1,4 +1,4 @@
-package team.idealstate.hyper.rpc.example.server.service;
+package team.idealstate.hyper.rpc.example.client.service;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -15,7 +15,7 @@ import java.time.Instant;
  * <p>创建于 2024/2/6 21:58</p>
  *
  * @author ketikai
- * @version 1.0.0
+ * @version 1.0.2
  * @since 1.0.0
  */
 public class HelloServiceImpl implements HelloService {
