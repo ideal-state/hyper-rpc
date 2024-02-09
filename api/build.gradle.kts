@@ -5,6 +5,7 @@ plugins {
     id("com.github.johnrengelman.shadow") version ("8.+")
 }
 
+val projectName = project.ext["projectName"] as String
 val authors = project.ext["authors"] as String
 val javaVersion = project.ext["javaVersion"] as Int
 val charset = project.ext["charset"] as String
@@ -33,7 +34,7 @@ tasks.compileJava {
 tasks.processResources {
     filteringCharset = charset
     includeEmptyDirs = false
-    val assetsDir = "assets/${rootProject.name.lowercase()}/${project.name.lowercase()}"
+    val assetsDir = "assets/${projectName}"
     eachFile {
         if (path.startsWith("assets/")) {
             print("$path >> ")
@@ -44,7 +45,6 @@ tasks.processResources {
 }
 
 tasks.shadowJar {
-    val projectName = "${rootProject.name}-${project.name}"
     archiveBaseName.set(projectName)
     archiveClassifier.set("")
     manifest {
