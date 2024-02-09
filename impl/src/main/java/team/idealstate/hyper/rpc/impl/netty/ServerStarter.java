@@ -63,10 +63,9 @@ public class ServerStarter implements ServiceStarter, ServiceInvoker {
                 .channel(NioServerSocketChannel.class)
                 .localAddress(bindAddress)
                 .option(ChannelOption.CONNECT_TIMEOUT_MILLIS, 6000)
-                .option(ChannelOption.SO_BACKLOG, 8)
-                .option(ChannelOption.TCP_NODELAY, true)
-                .option(ChannelOption.SO_SNDBUF, 65535)
                 .option(ChannelOption.SO_RCVBUF, 65535)
+                .childOption(ChannelOption.SO_SNDBUF, 65535)
+                .childOption(ChannelOption.TCP_NODELAY, true)
                 .childHandler(new ServerInitializer(this, this.key, this.serviceManager, channelGroup));
     }
 

@@ -30,7 +30,7 @@ import java.util.Set;
  * <p>创建于 2024/2/4 14:43</p>
  *
  * @author ketikai
- * @version 1.0.2
+ * @version 1.0.3
  * @since 1.0.0
  */
 public abstract class TypeUtils {
@@ -123,7 +123,7 @@ public abstract class TypeUtils {
             case "D":
                 return double.class;
             case "V":
-                return Void.class;
+                return void.class;
             default:
                 return Class.forName(
                         actualClassName.replace("[V", "[Ljava.lang.Void;"),
