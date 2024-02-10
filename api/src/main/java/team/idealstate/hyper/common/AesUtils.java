@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package team.idealstate.hyper.rpc.impl;
+package team.idealstate.hyper.common;
 
 import javax.crypto.Cipher;
 import javax.crypto.SecretKey;

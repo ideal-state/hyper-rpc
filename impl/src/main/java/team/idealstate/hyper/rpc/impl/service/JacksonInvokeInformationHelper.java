@@ -18,8 +18,8 @@ package team.idealstate.hyper.rpc.impl.service;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
 import org.jetbrains.annotations.NotNull;
-import org.objectweb.asm.Type;
-import team.idealstate.hyper.rpc.api.TypeUtils;
+import team.idealstate.hyper.common.ClassUtils;
+import team.idealstate.hyper.common.MethodUtils;
 import team.idealstate.hyper.rpc.api.service.InvokeInformationHelper;
 import team.idealstate.hyper.rpc.api.service.entity.ActualInvokeDetail;
 import team.idealstate.hyper.rpc.api.service.entity.ActualInvokeResult;
@@ -39,51 +39,6 @@ import team.idealstate.hyper.rpc.impl.JacksonUtils;
  */
 public final class JacksonInvokeInformationHelper implements InvokeInformationHelper {
 
-
-    private static Class<?>[] getArgumentClasses(Type[] argumentTypes, @NotNull ClassLoader classLoader) throws ClassNotFoundException {
-        Class<?>[] argumentClasses = new Class<?>[argumentTypes.length];
-        for (int i = 0; i < argumentTypes.length; i++) {
-            Type argumentType = argumentTypes[i];
-            String actualClassName = TypeUtils.getActualClassName(argumentType);
-            switch (actualClassName) {
-                case "Z":
-                    argumentClasses[i] = boolean.class;
-                    break;
-                case "C":
-                    argumentClasses[i] = char.class;
-                    break;
-                case "B":
-                    argumentClasses[i] = byte.class;
-                    break;
-                case "S":
-                    argumentClasses[i] = short.class;
-                    break;
-                case "I":
-                    argumentClasses[i] = int.class;
-                    break;
-                case "F":
-                    argumentClasses[i] = float.class;
-                    break;
-                case "J":
-                    argumentClasses[i] = long.class;
-                    break;
-                case "D":
-                    argumentClasses[i] = double.class;
-                    break;
-                case "V":
-                    argumentClasses[i] = Void.class;
-                    break;
-                default:
-                    argumentClasses[i] = Class.forName(
-                            actualClassName.replace("[V", "[Ljava.lang.Void;"),
-                            false,
-                            classLoader
-                    );
-            }
-        }
-        return argumentClasses;
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static Object[] getArgumentObjects(Class<?>[] argumentClasses, String[] arguments) throws JsonProcessingException {
         Object[] argumentObjects = new Object[argumentClasses.length];
@@ -95,7 +50,7 @@ public final class JacksonInvokeInformationHelper implements InvokeInformationHe
 
     @Override
     public @NotNull Class<?> getServiceInterface(@NotNull InvokeDetail invokeDetail, @NotNull ClassLoader classLoader) throws ClassNotFoundException {
-        return TypeUtils.getActualClass(invokeDetail.getService(), classLoader);
+        return ClassUtils.forName(invokeDetail.getService(), false, classLoader);
     }
 
     @Override
@@ -104,9 +59,9 @@ public final class JacksonInvokeInformationHelper implements InvokeInformationHe
         actualInvokeDetail.setId(invokeDetail.getId());
         final Class<?>[] argumentClasses;
         try {
-            final Class<?> serviceInterface = TypeUtils.getActualClass(invokeDetail.getService(), classLoader);
+            final Class<?> serviceInterface = ClassUtils.forName(invokeDetail.getService(), false, classLoader);
             actualInvokeDetail.setServiceInterface(serviceInterface);
-            argumentClasses = getArgumentClasses(Type.getArgumentTypes(invokeDetail.getDescription()), classLoader);
+            argumentClasses = MethodUtils.getParamTypes(invokeDetail.getDescription(), false, classLoader);
             actualInvokeDetail.setMethod(serviceInterface.getMethod(invokeDetail.getMethod(), argumentClasses));
             actualInvokeDetail.setArgumentObjects(getArgumentObjects(argumentClasses, invokeDetail.getArguments()));
         } catch (ClassNotFoundException | NoSuchMethodException | JsonProcessingException e) {
@@ -119,9 +74,9 @@ public final class JacksonInvokeInformationHelper implements InvokeInformationHe
     public @NotNull InvokeDetail convert(@NotNull ActualInvokeDetail actualInvokeDetail, @NotNull ClassLoader classLoader) throws InvokeInformationConvertException {
         InvokeDetail invokeDetail = new InvokeDetail();
         invokeDetail.setId(actualInvokeDetail.getId());
-        invokeDetail.setService(TypeUtils.getActualClassName(Type.getType(actualInvokeDetail.getServiceInterface())));
+        invokeDetail.setService(ClassUtils.getDesc(actualInvokeDetail.getServiceInterface()));
         invokeDetail.setMethod(actualInvokeDetail.getMethod().getName());
-        invokeDetail.setDescription(Type.getMethodDescriptor(actualInvokeDetail.getMethod()));
+        invokeDetail.setDescription(MethodUtils.getDesc(actualInvokeDetail.getMethod()));
         Object[] argumentObjects = actualInvokeDetail.getArgumentObjects();
         argumentObjects = argumentObjects == null ? new Object[0] : argumentObjects;
         String[] arguments = new String[argumentObjects.length];
@@ -143,7 +98,7 @@ public final class JacksonInvokeInformationHelper implements InvokeInformationHe
         actualInvokeResult.setCode(InvokeResult.Code.codeOf(invokeResult.getCode()));
         Class<?> dataType;
         try {
-            dataType = TypeUtils.getActualClass(invokeResult.getDataType(), classLoader);
+            dataType = ClassUtils.forDesc(invokeResult.getDataType(), false, classLoader);
             actualInvokeResult.setData(JacksonUtils.toBean(invokeResult.getData(), dataType));
         } catch (ClassNotFoundException | JsonProcessingException e) {
             throw new InvokeInformationConvertException(e);
@@ -157,7 +112,7 @@ public final class JacksonInvokeInformationHelper implements InvokeInformationHe
         InvokeResult invokeResult = new InvokeResult();
         invokeResult.setId(actualInvokeResult.getId());
         invokeResult.setCode(actualInvokeResult.getCode().getCode());
-        invokeResult.setDataType(TypeUtils.getActualClassName(Type.getType(actualInvokeResult.getDataType())));
+        invokeResult.setDataType(ClassUtils.getDesc(actualInvokeResult.getDataType()));
         try {
             invokeResult.setData(JacksonUtils.toJson(actualInvokeResult.getData()));
         } catch (JsonProcessingException e) {

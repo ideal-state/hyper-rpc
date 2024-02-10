@@ -15,7 +15,6 @@ dependencies {
     compileOnly(fileTree("${projectDir}/libraries"))
 
     api("org.apache.logging.log4j:log4j-core:2.22.1")
-    api("org.ow2.asm:asm:9.6")
 }
 
 java {

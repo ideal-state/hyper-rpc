@@ -16,7 +16,7 @@
 
 package team.idealstate.hyper.rpc.example.common;
 
-import team.idealstate.hyper.rpc.impl.RsaUtils;
+import team.idealstate.hyper.common.RsaUtils;
 
 import java.io.File;
 import java.io.FileNotFoundException;

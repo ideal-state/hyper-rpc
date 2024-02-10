@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package team.idealstate.hyper.rpc.api;
+package team.idealstate.hyper.common;
 
 import java.util.Collection;
 import java.util.Map;

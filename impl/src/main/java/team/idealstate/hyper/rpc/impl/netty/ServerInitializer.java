@@ -24,7 +24,7 @@ import io.netty.handler.codec.LengthFieldBasedFrameDecoder;
 import io.netty.handler.codec.LengthFieldPrepender;
 import io.netty.handler.timeout.IdleStateHandler;
 import org.jetbrains.annotations.NotNull;
-import team.idealstate.hyper.rpc.api.AssertUtils;
+import team.idealstate.hyper.common.AssertUtils;
 import team.idealstate.hyper.rpc.api.service.ServiceManager;
 import team.idealstate.hyper.rpc.api.service.ServiceStarter;
 import team.idealstate.hyper.rpc.impl.netty.handler.*;

@@ -17,7 +17,7 @@
 package team.idealstate.hyper.rpc.api.service.exception;
 
 import org.jetbrains.annotations.NotNull;
-import team.idealstate.hyper.rpc.api.AssertUtils;
+import team.idealstate.hyper.common.AssertUtils;
 
 /**
  * <p>UnregisteredServiceException</p>

@@ -20,8 +20,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import team.idealstate.hyper.rpc.api.AssertUtils;
-import team.idealstate.hyper.rpc.api.TypeUtils;
+import team.idealstate.hyper.common.AssertUtils;
+import team.idealstate.hyper.common.ClassUtils;
 import team.idealstate.hyper.rpc.api.future.Future;
 import team.idealstate.hyper.rpc.api.service.AbstractServiceManager;
 import team.idealstate.hyper.rpc.api.service.InvokeInformationHelper;
@@ -133,7 +133,7 @@ public class StdServiceManager extends AbstractServiceManager {
                     Future<InvokeResult> resultFuture = call(invokeDetail);
                     final Class<?> returnType = method.getReturnType();
                     InvokeResult invokeResult = resultFuture.get(getTimeout());
-                    final Class<?> dataType = TypeUtils.getActualClass(invokeResult.getDataType(), classLoader);
+                    final Class<?> dataType = ClassUtils.forDesc(invokeResult.getDataType(), false, classLoader);
                     if (invokeResult.getCode() == InvokeResult.Code.SUCCESS.getCode()) {
                         if (returnType.isAssignableFrom(dataType)) {
                             if (void.class.isAssignableFrom(returnType) || Void.class.isAssignableFrom(returnType)) {

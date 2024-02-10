@@ -18,7 +18,7 @@ package team.idealstate.hyper.rpc.example.client;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import team.idealstate.hyper.rpc.api.StringUtils;
+import team.idealstate.hyper.common.StringUtils;
 import team.idealstate.hyper.rpc.api.service.Watchdog;
 import team.idealstate.hyper.rpc.example.common.KeyUtils;
 import team.idealstate.hyper.rpc.example.common.service.CalcService;

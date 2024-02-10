@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package team.idealstate.hyper.rpc.api;
+package team.idealstate.hyper.common;
 
 /**
  * <p>StringUtils</p>

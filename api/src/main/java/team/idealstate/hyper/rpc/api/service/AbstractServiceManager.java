@@ -20,7 +20,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
-import team.idealstate.hyper.rpc.api.AssertUtils;
+import team.idealstate.hyper.common.AssertUtils;
 import team.idealstate.hyper.rpc.api.future.Future;
 import team.idealstate.hyper.rpc.api.future.exception.InvalidFutureException;
 import team.idealstate.hyper.rpc.api.service.entity.InvokeDetail;

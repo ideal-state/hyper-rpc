@@ -21,8 +21,6 @@ import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.objectweb.asm.Type;
-import team.idealstate.hyper.rpc.api.TypeUtils;
 import team.idealstate.hyper.rpc.api.service.ServiceManager;
 import team.idealstate.hyper.rpc.api.service.entity.InvokeDetail;
 import team.idealstate.hyper.rpc.api.service.entity.InvokeResult;
@@ -63,7 +61,7 @@ public class ServiceManagerAdapter extends ChannelInboundHandlerAdapter {
                     result = new InvokeResult(
                             ((InvokeDetail) msg).getId(),
                             InvokeResult.Code.FAIL.getCode(),
-                            TypeUtils.getActualClassName(Type.getType(String.class)),
+                            String.class.getName(),
                             e.getMessage()
                     );
                 }

@@ -20,12 +20,6 @@ logging-log4j2:
 
 ========================================================================
 
-asm:
-    asm
-(https://gitlab.ow2.org/asm/asm)
-
-========================================================================
-
 jackson-databind
 (https://github.com/FasterXML/jackson-databind)
 
