@@ -50,7 +50,7 @@ public final class JacksonInvokeInformationHelper implements InvokeInformationHe
 
     @Override
     public @NotNull Class<?> getServiceInterface(@NotNull InvokeDetail invokeDetail, @NotNull ClassLoader classLoader) throws ClassNotFoundException {
-        return ClassUtils.forName(invokeDetail.getService(), false, classLoader);
+        return ClassUtils.forDesc(invokeDetail.getService(), false, classLoader);
     }
 
     @Override
@@ -59,7 +59,7 @@ public final class JacksonInvokeInformationHelper implements InvokeInformationHe
         actualInvokeDetail.setId(invokeDetail.getId());
         final Class<?>[] argumentClasses;
         try {
-            final Class<?> serviceInterface = ClassUtils.forName(invokeDetail.getService(), false, classLoader);
+            final Class<?> serviceInterface = ClassUtils.forDesc(invokeDetail.getService(), false, classLoader);
             actualInvokeDetail.setServiceInterface(serviceInterface);
             argumentClasses = MethodUtils.getParamTypes(invokeDetail.getDescription(), false, classLoader);
             actualInvokeDetail.setMethod(serviceInterface.getMethod(invokeDetail.getMethod(), argumentClasses));

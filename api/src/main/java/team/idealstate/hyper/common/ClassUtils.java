@@ -115,6 +115,9 @@ public abstract class ClassUtils {
                     return double.class;
             }
         }
+        if (desc.startsWith("L")) {
+            return Class.forName(desc.substring(1, desc.length() - 1), initialize, classLoader);
+        }
         return Class.forName(desc, initialize, classLoader);
     }
 
