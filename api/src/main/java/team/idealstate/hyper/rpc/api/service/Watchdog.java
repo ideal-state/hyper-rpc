@@ -52,6 +52,10 @@ public final class Watchdog {
         this(target, listener, DEFAULT_MAXIMUM_RETRY);
     }
 
+    public Watchdog(@NotNull ServiceStarter target, int maximumRetry) {
+        this(target, null, maximumRetry);
+    }
+
     public Watchdog(@NotNull ServiceStarter target, WatchdogListener listener, int maximumRetry) {
         AssertUtils.notNull(target, "目标实例不允许为 null");
         this.target = target;
@@ -106,6 +110,7 @@ public final class Watchdog {
                             logger.warn("连续重试次数已达 {} 次，{} 即将关闭",
                                     Watchdog.this.maximumRetry, Thread.currentThread().getName());
                             Thread.currentThread().interrupt();
+                            fireUnnaturalDeathEvent();
                             continue;
                         }
                     }
@@ -159,6 +164,12 @@ public final class Watchdog {
     private void fireAfterEvent(WatchdogListener.When when) {
         if (hasListener) {
             listener.after(when);
+        }
+    }
+
+    private void fireUnnaturalDeathEvent() {
+        if (hasListener) {
+            listener.unnaturalDeath();
         }
     }
 

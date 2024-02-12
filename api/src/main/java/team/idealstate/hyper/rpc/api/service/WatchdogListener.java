@@ -36,6 +36,9 @@ public interface WatchdogListener {
     default void exceptionCaught(When when, Throwable e) {
     }
 
+    default void unnaturalDeath() {
+    }
+
     enum When {
         STARTUP,
         CLOSE,
