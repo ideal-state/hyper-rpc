@@ -97,7 +97,8 @@ public class ClientStarter implements ServiceStarter, ServiceInvoker {
                 channelFuture.sync();
                 logger.info("[{}] 客户端启动完成", connectAddress);
             } catch (InterruptedException e) {
-                logger.error("[{}] 线程中断，客户端未能启动完成", connectAddress);
+                logger.debug("[{}] 线程中断，客户端未能启动完成", connectAddress);
+                Thread.currentThread().interrupt();
                 return;
             }
             this.needClose = false;
@@ -128,6 +129,7 @@ public class ClientStarter implements ServiceStarter, ServiceInvoker {
                         channelGroup.clear();
                     } catch (InterruptedException e) {
                         logger.error("[{}] 线程中断，通道未能完成关闭", connectAddress);
+                        Thread.currentThread().interrupt();
                         return;
                     }
                     this.needClose = false;

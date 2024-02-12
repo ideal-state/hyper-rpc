@@ -51,11 +51,11 @@ public final class Watchdog {
         this.target = target;
         this.maximumRetry = Math.max(DEFAULT_MAXIMUM_RETRY, maximumRetry);
         this.watchdogThread = new Thread(() -> {
-            final ServiceStarter serviceStarter = Watchdog.this.target;
+            final ServiceStarter starter = Watchdog.this.target;
             while (true) {
                 if (Thread.interrupted()) {
                     try {
-                        serviceStarter.shutdown();
+                        starter.shutdown();
                     } catch (Throwable e) {
                         logger.catching(e);
                     } finally {
@@ -63,18 +63,19 @@ public final class Watchdog {
                     }
                     break;
                 }
-                if (serviceStarter.isNeedClose()) {
-                    serviceStarter.close();
-                }
-                if (!serviceStarter.isActive()) {
+                if (starter.isNeedClose()) {
+                    starter.close();
+                } else if (!starter.isActive()) {
                     try {
-                        serviceStarter.startup();
+                        starter.startup();
                     } catch (Throwable e) {
-                        logger.catching(e);
+                        logger.error(e.getMessage());
+                        logger.debug("catching", e);
                         try {
-                            serviceStarter.close();
+                            starter.close();
                         } catch (Throwable ex) {
-                            logger.catching(ex);
+                            logger.error(ex.getMessage());
+                            logger.debug("catching", ex);
                         }
                         if (retryCount.incrementAndGet() >= Watchdog.this.maximumRetry) {
                             logger.warn("连续重试次数已达 {} 次，{} 即将关闭",
@@ -92,7 +93,6 @@ public final class Watchdog {
             }
             logger.info("{} 已关闭", Thread.currentThread().getName());
         }, "Watchdog-" + IDS.getAndIncrement());
-        watchdogThread.setDaemon(false);
     }
 
     public void startup() {
@@ -112,9 +112,16 @@ public final class Watchdog {
                 }
             }
         }
+        if (target.isActive()) {
+            target.shutdown();
+        }
+    }
+
+    public boolean isAlive() {
+        return watchdogThread.isAlive();
     }
 
     public boolean isActive() {
-        return watchdogThread.isAlive();
+        return target.isActive();
     }
 }

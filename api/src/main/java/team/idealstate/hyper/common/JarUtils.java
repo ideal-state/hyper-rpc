@@ -37,16 +37,6 @@ import java.util.jar.JarFile;
 public abstract class JarUtils {
 
     @NotNull
-    public static File copy(@NotNull String resourcePath, @NotNull File destinationDirectory) {
-        return copy(JarUtils.class, resourcePath, destinationDirectory, false);
-    }
-
-    @NotNull
-    public static File copy(@NotNull String resourcePath, @NotNull File destinationDirectory, boolean replaceExisting) {
-        return copy(JarUtils.class, resourcePath, destinationDirectory, replaceExisting);
-    }
-
-    @NotNull
     public static File copy(@NotNull Class<?> sourceClass, @NotNull String resourcePath, @NotNull File destinationDirectory) {
         return copy(sourceClass, resourcePath, destinationDirectory, false);
     }

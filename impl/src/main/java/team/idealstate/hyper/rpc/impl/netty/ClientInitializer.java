@@ -51,13 +51,13 @@ public class ClientInitializer extends ChannelInitializer<SocketChannel> {
      * @param channelGroup
      */
     public ClientInitializer(@NotNull ServiceStarter serviceStarter, @NotNull Key key, @NotNull ServiceManager serviceManager, ChannelGroup channelGroup) {
-        this.channelGroup = channelGroup;
         AssertUtils.notNull(serviceStarter, "服务启动器不允许为 null");
         AssertUtils.notNull(key, "消息密钥不允许为 null");
         AssertUtils.notNull(serviceManager, "服务管理器不允许为 null");
         this.serviceStarter = serviceStarter;
         this.key = key;
         this.serviceManager = serviceManager;
+        this.channelGroup = channelGroup;
     }
 
     @Override
