@@ -21,8 +21,10 @@ import org.jetbrains.annotations.NotNull;
 import java.nio.charset.StandardCharsets;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentHashMap;
 
 /**
  * <p>Identifier</p>
@@ -63,10 +65,13 @@ public final class Identifier {
         this.hashString = hexString.toString();
     }
 
+    private static final Map<String, Identifier> CACHE = new ConcurrentHashMap<>(64, 0.6F);
+
     public static Identifier from(@NotNull Class<?> namespace, @NotNull UUID uuid) {
         AssertUtils.notNull(namespace, "无效的命名空间");
         AssertUtils.notNull(uuid, "无效的唯一标识");
-        return new Identifier(ClassUtils.getDesc(namespace), uuid);
+        String key = ClassUtils.getDesc(namespace) + "#" + uuid;
+        return CACHE.computeIfAbsent(key, k -> new Identifier(ClassUtils.getDesc(namespace), uuid));
     }
 
     @Override
