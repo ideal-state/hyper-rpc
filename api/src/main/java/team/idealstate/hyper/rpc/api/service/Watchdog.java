@@ -41,42 +41,66 @@ public final class Watchdog {
     private final int maximumRetry;
     private final ServiceStarter target;
     private final AtomicInteger retryCount = new AtomicInteger(0);
+    private final WatchdogListener listener;
+    private final boolean hasListener;
 
     public Watchdog(@NotNull ServiceStarter target) {
-        this(target, DEFAULT_MAXIMUM_RETRY);
+        this(target, null, DEFAULT_MAXIMUM_RETRY);
     }
 
-    public Watchdog(@NotNull ServiceStarter target, int maximumRetry) {
+    public Watchdog(@NotNull ServiceStarter target, WatchdogListener listener) {
+        this(target, listener, DEFAULT_MAXIMUM_RETRY);
+    }
+
+    public Watchdog(@NotNull ServiceStarter target, WatchdogListener listener, int maximumRetry) {
         AssertUtils.notNull(target, "目标实例不允许为 null");
         this.target = target;
+        this.listener = listener;
+        this.hasListener = this.listener != null;
         this.maximumRetry = Math.max(DEFAULT_MAXIMUM_RETRY, maximumRetry);
         this.watchdogThread = new Thread(() -> {
             final ServiceStarter starter = Watchdog.this.target;
             while (true) {
                 if (Thread.interrupted()) {
                     try {
+                        fireBeforeEvent(WatchdogListener.When.SHUTDOWN);
                         starter.shutdown();
+                        fireAfterEvent(WatchdogListener.When.SHUTDOWN);
                     } catch (Throwable e) {
                         logger.error(e.getMessage());
                         logger.debug("catching", e);
-                    } finally {
-                        retryCount.set(0);
+                        fireExceptionCaughtEvent(WatchdogListener.When.SHUTDOWN, e);
                     }
                     break;
                 }
                 if (starter.isNeedClose()) {
-                    starter.close();
-                } else if (!starter.isActive()) {
                     try {
-                        starter.startup();
+                        fireBeforeEvent(WatchdogListener.When.CLOSE);
+                        starter.close();
+                        fireAfterEvent(WatchdogListener.When.CLOSE);
                     } catch (Throwable e) {
                         logger.error(e.getMessage());
                         logger.debug("catching", e);
+                        fireExceptionCaughtEvent(WatchdogListener.When.CLOSE, e);
+                    }
+                } else if (!starter.isActive()) {
+                    try {
+                        fireBeforeEvent(WatchdogListener.When.STARTUP);
+                        starter.startup();
+                        fireAfterEvent(WatchdogListener.When.STARTUP);
+                        retryCount.set(0);
+                    } catch (Throwable e) {
+                        logger.error(e.getMessage());
+                        logger.debug("catching", e);
+                        fireExceptionCaughtEvent(WatchdogListener.When.STARTUP, e);
                         try {
+                            fireBeforeEvent(WatchdogListener.When.CLOSE);
                             starter.close();
+                            fireAfterEvent(WatchdogListener.When.CLOSE);
                         } catch (Throwable ex) {
                             logger.error(ex.getMessage());
                             logger.debug("catching", ex);
+                            fireExceptionCaughtEvent(WatchdogListener.When.CLOSE, ex);
                         }
                         if (retryCount.incrementAndGet() >= Watchdog.this.maximumRetry) {
                             logger.warn("连续重试次数已达 {} 次，{} 即将关闭",
@@ -124,5 +148,23 @@ public final class Watchdog {
 
     public boolean isActive() {
         return target.isActive();
+    }
+
+    private void fireBeforeEvent(WatchdogListener.When when) {
+        if (hasListener) {
+            listener.before(when);
+        }
+    }
+
+    private void fireAfterEvent(WatchdogListener.When when) {
+        if (hasListener) {
+            listener.after(when);
+        }
+    }
+
+    private void fireExceptionCaughtEvent(WatchdogListener.When when, Throwable e) {
+        if (hasListener) {
+            listener.exceptionCaught(when, e);
+        }
     }
 }
