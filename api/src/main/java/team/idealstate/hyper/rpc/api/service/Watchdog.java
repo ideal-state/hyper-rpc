@@ -57,7 +57,8 @@ public final class Watchdog {
                     try {
                         starter.shutdown();
                     } catch (Throwable e) {
-                        logger.catching(e);
+                        logger.error(e.getMessage());
+                        logger.debug("catching", e);
                     } finally {
                         retryCount.set(0);
                     }
